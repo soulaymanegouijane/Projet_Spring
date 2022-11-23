@@ -24,6 +24,12 @@ public class Association {
            mappedBy = "association"
    )
     private Set<Member> members;
+
+   @OneToMany(
+           mappedBy = "association"
+    )
+    private Set<Offer> offers;
+
    @Override
     public String toString(){
        return "id :"+ id +

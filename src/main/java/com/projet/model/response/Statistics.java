@@ -4,13 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatus;
+
+import java.util.Map;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@AllArgsConstructor @NoArgsConstructor
 @Builder
-public class MessageResponse {
-    HttpStatus status;
-    String message;
+public class Statistics {
+
+    private Map<String, Long> statistics;
+
 }

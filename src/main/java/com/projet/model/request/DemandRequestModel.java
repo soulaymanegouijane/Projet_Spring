@@ -1,16 +1,15 @@
-package com.projet.model.response;
+package com.projet.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MessageResponse {
-    HttpStatus status;
-    String message;
+public class DemandRequestModel {
+    private long offerId;
+    private long memberId;
 }
