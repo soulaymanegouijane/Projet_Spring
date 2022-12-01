@@ -36,8 +36,6 @@ public class Offer {
     @OneToMany
     private Set<Demand> demands;
 
-    @OneToOne
-    private Material material;
 
     @ManyToOne
     private Association association;

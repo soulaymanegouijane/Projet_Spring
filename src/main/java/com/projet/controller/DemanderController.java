@@ -13,12 +13,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/demander")
+@CrossOrigin("*")
 public class DemanderController {
     @Autowired
     DemanderService demandService;
 
-    @Autowired
-    DemandRepository demandRepository;
 
     @GetMapping("/offers/{id}")
     public Offer retreiveOfferById(@PathVariable Long id) throws OfferNotFoundException {

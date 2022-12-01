@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,8 +47,7 @@ public class DemanderServiceImpl implements DemanderService {
     @Transactional
     @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<ResponseMessage> persistDemand(DemandRequestModel demand) throws MemberNotFoundException, OfferNotFoundException {
-        Member member = memberRepository.findById(demand.getMemberId())
-                .orElseThrow(() -> new MemberNotFoundException("Ce membre n'existe pas"));
+        Member member = (Member) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Offer offer = offerRepository.findById(demand.getOfferId())
                 .orElseThrow(() -> new OfferNotFoundException("Cette offre n'existe pas"));
         int rank = calculateRank();

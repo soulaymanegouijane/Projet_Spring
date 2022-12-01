@@ -11,5 +11,4 @@ import lombok.NoArgsConstructor;
 @Builder
 public class DemandRequestModel {
     private long offerId;
-    private long memberId;
 }

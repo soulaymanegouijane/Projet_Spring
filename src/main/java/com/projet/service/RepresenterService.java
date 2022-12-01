@@ -11,6 +11,8 @@ import com.projet.model.request.OfferRequestModel;
 import com.projet.model.response.MessageResponse;
 import com.projet.model.response.ResponseMessage;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -19,9 +21,14 @@ public interface RepresenterService {
 
     ResponseEntity<ResponseMessage> persistOffer(OfferRequestModel offer) throws MaterialNotFoundException, CategoryNotFoundException;
 
-    ResponseEntity<ResponseMessage> acceptOrRefuseDemand(Long id, DemandDecisionModel demandDecision);
+
+    @Transactional
+    @PreAuthorize("hasRole('REPRESENTATIVE')")
+    ResponseEntity<ResponseMessage> RefuseDemand(Long id, String comment);
 
     Set<Demand> retreiveAllAssociationDemands(long id) throws OfferNotFoundException;
 
     ResponseEntity<MessageResponse> transferDemand(long id) throws DemandNotFoundException;
+
+    ResponseEntity<ResponseMessage> acceptDemand(Long id);
 }

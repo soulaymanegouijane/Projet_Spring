@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DemandDecisionModel {
 
-    private boolean accepted;
-
     private String comment;
 
 }

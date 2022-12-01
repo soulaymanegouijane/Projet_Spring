@@ -4,6 +4,7 @@ package com.projet.controller;
 import com.projet.entity.Demand;
 import com.projet.entity.Offer;
 import com.projet.exception.CategoryNotFoundException;
+import com.projet.exception.DemandNotFoundException;
 import com.projet.exception.MaterialNotFoundException;
 import com.projet.exception.OfferNotFoundException;
 import com.projet.model.request.DemandDecisionModel;
@@ -19,6 +20,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/representer")
+@CrossOrigin("*")
 public class RepresenterController {
 
     @Autowired
@@ -35,9 +37,13 @@ public class RepresenterController {
         return representerService.retreiveAllAssociationOffers();
     }
 
-    @PutMapping("/demands/{id}")
-    public ResponseEntity<ResponseMessage> acceptOrRefuseDemand(@PathVariable Long id, @RequestBody DemandDecisionModel demandDecision) throws MaterialNotFoundException, CategoryNotFoundException {
-        return representerService.acceptOrRefuseDemand(id, demandDecision);
+    @PutMapping("/demands/{id}/reject")
+    public ResponseEntity<ResponseMessage> acceptOrRefuseDemand(@PathVariable Long id, @RequestBody String comment) throws MaterialNotFoundException, CategoryNotFoundException {
+        return representerService.RefuseDemand(id, comment);
+    }
+    @PutMapping("/demands/{id}/accept")
+    public ResponseEntity<ResponseMessage> acceptDemand(@PathVariable Long id) throws MaterialNotFoundException, CategoryNotFoundException {
+        return representerService.acceptDemand(id);
     }
 
     @GetMapping("/offer/{id}/demands")
@@ -45,8 +51,8 @@ public class RepresenterController {
         return representerService.retreiveAllAssociationDemands(id);
     }
 
-    @PutMapping("/demands/{id}")
-    public ResponseEntity<MessageResponse> transferDemand(@PathVariable long id){
+    @PutMapping("/demands/{id}/transfer")
+    public ResponseEntity<MessageResponse> transferDemand(@PathVariable long id) throws DemandNotFoundException {
         return representerService.transferDemand(id);
 
     }

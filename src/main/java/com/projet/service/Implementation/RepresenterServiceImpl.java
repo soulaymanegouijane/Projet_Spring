@@ -11,7 +11,6 @@ import com.projet.model.response.MessageResponse;
 import com.projet.model.response.ResponseMessage;
 import com.projet.repository.CategoryRepository;
 import com.projet.repository.DemandRepository;
-import com.projet.repository.MaterialRepository;
 import com.projet.repository.OfferRepository;
 import com.projet.service.RepresenterService;
 import com.projet.utils.Decision;
@@ -31,8 +30,6 @@ public class RepresenterServiceImpl implements RepresenterService {
     @Autowired
     OfferRepository offerRepository;
 
-    @Autowired
-    MaterialRepository materialRepository;
 
     @Autowired
     CategoryRepository categoryRepository;
@@ -51,22 +48,16 @@ public class RepresenterServiceImpl implements RepresenterService {
     @Transactional
     @PreAuthorize("hasRole('REPRESENTATIVE')")
     public ResponseEntity<ResponseMessage> persistOffer(OfferRequestModel offer) throws MaterialNotFoundException, CategoryNotFoundException {
-        if (offerRepository.existsByMaterialId(offer.getMaterialId())) {
-            return ResponseEntity.badRequest().body(ResponseMessage.builder()
-                    .status(HttpStatus.BAD_REQUEST)
-                    .message("Le produit que vous avez selectionné contient déjà une offre")
-                    .build());
-        }
         Set<Category> categories = new HashSet<>();
-        Material material = materialRepository.findById(offer.getMaterialId())
-                .orElseThrow(() -> new MaterialNotFoundException("le material avec l'id " + offer.getMaterialId() + " n'existe pas"));
+//        Material material = materialRepository.findById(offer.getMaterialId())
+//                .orElseThrow(() -> new MaterialNotFoundException("le material avec l'id " + offer.getMaterialId() + " n'existe pas"));
         for (long categoryId : offer.getCategoryIds()) {
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new CategoryNotFoundException("La Catégorie avec l'id " + categoryId + " n'existe pas"));
             categories.add(category);
         }
+        //TODO : ENREGISTRER L4IMAGE
         Offer newOffer = Offer.builder()
-                .material(material)
                 .categories(categories)
                 .description(offer.getDescription())
                 .title(offer.getTitle())
@@ -81,21 +72,17 @@ public class RepresenterServiceImpl implements RepresenterService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('REPRESENTATIVE')")
-    public ResponseEntity<ResponseMessage> acceptOrRefuseDemand(Long id, DemandDecisionModel demandDecision) {
+    public ResponseEntity<ResponseMessage> RefuseDemand(Long id, String comment) {
         Demand demand = demandRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("La demande avec l'id " + id + " n'existe pas"));
-        if(demandDecision.isAccepted()){
-            demand.setStatus(Decision.ACCEPTED);
-        }else{
-            if (demandDecision.getComment() == null || demandDecision.getComment().isEmpty()) {
+            if (comment == null || comment.isEmpty()) {
                 return ResponseEntity.badRequest().body(ResponseMessage.builder()
                         .status(HttpStatus.BAD_REQUEST)
                         .message("Vous devez ajouter un commentaire")
                         .build());
             }
             demand.setStatus(Decision.REFUSED);
-            demand.setComment(demandDecision.getComment());
-        }
+            demand.setComment(comment);
         demandRepository.save(demand);
         return ResponseEntity.ok()
                 .body(ResponseMessage.builder()
@@ -132,6 +119,20 @@ public class RepresenterServiceImpl implements RepresenterService {
                 .body(MessageResponse.builder()
                         .status(HttpStatus.OK)
                         .message("La demande a été transférée avec succès")
+                        .build());
+    }
+
+    @Override
+    @PreAuthorize("hasRole('REPRESENTATIVE')")
+    public ResponseEntity<ResponseMessage> acceptDemand(Long id) {
+        Demand demand = demandRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("La demande avec l'id " + id + " n'existe pas"));
+        demand.setStatus(Decision.ACCEPTED);
+        demandRepository.save(demand);
+        return ResponseEntity.ok()
+                .body(ResponseMessage.builder()
+                        .status(HttpStatus.ACCEPTED)
+                        .message("Votre demande a été mis à jour")
                         .build());
     }
 }

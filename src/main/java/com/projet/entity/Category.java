@@ -22,7 +22,7 @@ public class Category {
 
     private String description;
 
-    @OneToMany
-    private Set<Material> materials;
+    @ManyToMany
+    private Set<Offer> offers;
 
 }
