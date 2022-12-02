@@ -6,11 +6,11 @@ import com.projet.entity.Member;
 import com.projet.entity.Offer;
 import com.projet.exception.MemberNotFoundException;
 import com.projet.exception.OfferNotFoundException;
-import com.projet.model.request.DemandRequestModel;
 import com.projet.model.response.ResponseMessage;
 import com.projet.repository.DemandRepository;
 import com.projet.repository.MemberRepository;
 import com.projet.repository.OfferRepository;
+import com.projet.security.services.UserDetailsImpl;
 import com.projet.service.DemanderService;
 import com.projet.utils.Decision;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +46,12 @@ public class DemanderServiceImpl implements DemanderService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('MEMBER')")
-    public ResponseEntity<ResponseMessage> persistDemand(DemandRequestModel demand) throws MemberNotFoundException, OfferNotFoundException {
-        Member member = (Member) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Offer offer = offerRepository.findById(demand.getOfferId())
+    public ResponseEntity<ResponseMessage> persistDemand(long offerId) throws OfferNotFoundException, MemberNotFoundException {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Member member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new MemberNotFoundException("Ce membre n'existe pas"));
+
+        Offer offer = offerRepository.findById(offerId)
                 .orElseThrow(() -> new OfferNotFoundException("Cette offre n'existe pas"));
         int rank = calculateRank();
         Demand newDemand = Demand.builder()

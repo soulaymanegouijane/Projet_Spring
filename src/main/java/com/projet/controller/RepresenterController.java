@@ -7,7 +7,6 @@ import com.projet.exception.CategoryNotFoundException;
 import com.projet.exception.DemandNotFoundException;
 import com.projet.exception.MaterialNotFoundException;
 import com.projet.exception.OfferNotFoundException;
-import com.projet.model.request.DemandDecisionModel;
 import com.projet.model.request.OfferRequestModel;
 import com.projet.model.response.MessageResponse;
 import com.projet.model.response.ResponseMessage;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -29,16 +29,17 @@ public class RepresenterController {
 
     @PostMapping("/offers")
     public ResponseEntity<ResponseMessage> addOffer(@RequestBody OfferRequestModel offer) throws MaterialNotFoundException, CategoryNotFoundException {
+        System.out.println("offer = " + offer);
         return representerService.persistOffer(offer);
     }
 
     @GetMapping("/offers")
-    public Set<Offer> getAllOffers() {
+    public List<Offer> getAllOffers() {
         return representerService.retreiveAllAssociationOffers();
     }
 
     @PutMapping("/demands/{id}/reject")
-    public ResponseEntity<ResponseMessage> acceptOrRefuseDemand(@PathVariable Long id, @RequestBody String comment) throws MaterialNotFoundException, CategoryNotFoundException {
+    public ResponseEntity<ResponseMessage> rejectDemand(@PathVariable Long id, @RequestBody String comment) throws MaterialNotFoundException, CategoryNotFoundException {
         return representerService.RefuseDemand(id, comment);
     }
     @PutMapping("/demands/{id}/accept")
@@ -46,9 +47,9 @@ public class RepresenterController {
         return representerService.acceptDemand(id);
     }
 
-    @GetMapping("/offer/{id}/demands")
-    public Set<Demand> getAllDemands(@PathVariable long id) throws OfferNotFoundException {
-        return representerService.retreiveAllAssociationDemands(id);
+    @GetMapping("/demands")
+    public Set<Demand> getAllDemands() throws OfferNotFoundException {
+        return representerService.retreiveAllAssociationDemands();
     }
 
     @PutMapping("/demands/{id}/transfer")

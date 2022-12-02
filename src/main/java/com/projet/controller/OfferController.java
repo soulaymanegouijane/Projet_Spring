@@ -7,17 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
 @RequestMapping("/api/offers")
-@CrossOrigin("*")
 public class OfferController {
     @Autowired
     OfferService offerService;
 
-    @GetMapping("/{page}")
-    public Page<Offer> retreiveOffers(@PathVariable int page){
-        return offerService.retreiveOffers(page);
+    @GetMapping
+    public List<Offer> retreiveOffers(){
+        return offerService.retreiveOffers();
     }
 }

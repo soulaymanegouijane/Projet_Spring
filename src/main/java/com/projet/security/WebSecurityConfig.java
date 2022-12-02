@@ -16,6 +16,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 
 @Configuration
@@ -80,17 +85,39 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+        http.csrf().disable();
+        http.headers().frameOptions().disable();
+        http.cors().configurationSource(corsConfigurationSource());
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+//        http.authorizeRequests().antMatchers("/**").permitAll();
+        http.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
+                .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("/api/test/**").permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().permitAll();
 
         http.authenticationProvider(authenticationProvider());
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        final CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("HEAD",
+                "GET", "POST", "PUT", "DELETE", "PATCH","OPTIONS"));
+        // setAllowCredentials(true) is important, otherwise
+        // The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'.
+        configuration.setAllowCredentials(true);
+        // setAllowedHeaders is important! Without it, OPTIONS preflight request
+        // will fail with 403 Invalid CORS request
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers","Access-Control-Allow-Origin"));
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

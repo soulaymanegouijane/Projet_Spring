@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/demander")
+@RequestMapping("/api")
 @CrossOrigin("*")
 public class DemanderController {
     @Autowired
@@ -24,9 +24,9 @@ public class DemanderController {
         return demandService.getOfferById(id);
     }
 
-    @PostMapping("/demands")
-    public ResponseEntity<ResponseMessage> createDemand(@RequestBody DemandRequestModel demand) throws MemberNotFoundException, OfferNotFoundException {
-        return demandService.persistDemand(demand);
+    @PostMapping("/offers/{id}/demand")
+    public ResponseEntity<ResponseMessage> createDemand(@PathVariable long id) throws MemberNotFoundException, OfferNotFoundException {
+        return demandService.persistDemand(id);
     }
 
 }

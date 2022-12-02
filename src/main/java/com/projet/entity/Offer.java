@@ -18,6 +18,7 @@ import java.util.Set;
 @Builder
 public class Offer {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     private String title;
@@ -38,5 +39,5 @@ public class Offer {
 
 
     @ManyToOne
-    private Association association;
+    Association association;
 }

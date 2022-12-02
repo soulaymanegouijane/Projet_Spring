@@ -9,10 +9,10 @@ import java.util.Set;
 
 public interface OfferRepository extends JpaRepository<Offer, Long> {
 
-    @Query("SELECT o FROM Offer o WHERE o.association.id = ?1")
-    Set<Offer> findByAssociationId(long id);
+    @Query("select o from Offer o where o.association.id = ?1")
+    List<Offer> findByAssociationId(long id);
 
-    @Query("SELECT count(o) FROM Offer o WHERE o.association.id = ?1")
+    @Query("select count(o) from Offer o where o.association.id = ?1")
     Long countByAssociationId(long id);
 
     @Query("SELECT count(o) FROM Offer o WHERE o.association.id = ?1 and o.isArchived = ?2")

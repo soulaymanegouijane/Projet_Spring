@@ -5,13 +5,14 @@ import com.projet.exception.CategoryNotFoundException;
 import com.projet.exception.DemandNotFoundException;
 import com.projet.exception.MaterialNotFoundException;
 import com.projet.exception.OfferNotFoundException;
-import com.projet.model.request.DemandDecisionModel;
 import com.projet.model.request.OfferRequestModel;
 import com.projet.model.response.MessageResponse;
 import com.projet.model.response.ResponseMessage;
 import com.projet.repository.CategoryRepository;
 import com.projet.repository.DemandRepository;
+import com.projet.repository.MemberRepository;
 import com.projet.repository.OfferRepository;
+import com.projet.security.services.UserDetailsImpl;
 import com.projet.service.RepresenterService;
 import com.projet.utils.Decision;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -29,6 +31,9 @@ public class RepresenterServiceImpl implements RepresenterService {
 
     @Autowired
     OfferRepository offerRepository;
+
+    @Autowired
+    MemberRepository memberRepository;
 
 
     @Autowired
@@ -39,7 +44,7 @@ public class RepresenterServiceImpl implements RepresenterService {
 
     @Override
     @PreAuthorize("hasRole('REPRESENTATIVE')")
-    public Set<Offer> retreiveAllAssociationOffers() {
+    public List<Offer> retreiveAllAssociationOffers() {
         Member member = (Member) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return offerRepository.findByAssociationId(member.getAssociation().getId());
     }
@@ -48,19 +53,20 @@ public class RepresenterServiceImpl implements RepresenterService {
     @Transactional
     @PreAuthorize("hasRole('REPRESENTATIVE')")
     public ResponseEntity<ResponseMessage> persistOffer(OfferRequestModel offer) throws MaterialNotFoundException, CategoryNotFoundException {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Member member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("L'utilisateur avec l'id " + userDetails.getId() + " n'existe pas"));
         Set<Category> categories = new HashSet<>();
-//        Material material = materialRepository.findById(offer.getMaterialId())
-//                .orElseThrow(() -> new MaterialNotFoundException("le material avec l'id " + offer.getMaterialId() + " n'existe pas"));
         for (long categoryId : offer.getCategoryIds()) {
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new CategoryNotFoundException("La Catégorie avec l'id " + categoryId + " n'existe pas"));
             categories.add(category);
         }
-        //TODO : ENREGISTRER L4IMAGE
         Offer newOffer = Offer.builder()
                 .categories(categories)
                 .description(offer.getDescription())
                 .title(offer.getTitle())
+                .association(member.getAssociation())
                 .build();
         offerRepository.save(newOffer);
         return ResponseEntity.ok(ResponseMessage.builder()
@@ -93,14 +99,16 @@ public class RepresenterServiceImpl implements RepresenterService {
 
     @Override
     @PreAuthorize("hasRole('REPRESENTATIVE')")
-    public Set<Demand> retreiveAllAssociationDemands(long id) throws OfferNotFoundException {
-        Member member = (Member) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Set<Offer> offers = offerRepository.findByAssociationId(member.getAssociation().getId());
+    public Set<Demand> retreiveAllAssociationDemands() throws OfferNotFoundException {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Member member = memberRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("L'utilisateur avec l'id " + userDetails.getId() + " n'existe pas"));
+        List<Offer> offers = offerRepository.findByAssociationId(member.getAssociation().getId());
+        System.out.println(offers);
         return offers.stream()
-                .filter(offer -> offer.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new OfferNotFoundException("L'offre avec l'id " + id + " n'existe pas"))
-                .getDemands();
+                .map(Offer::getDemands)
+                .flatMap(Set::stream)
+                .collect(HashSet::new, HashSet::add, HashSet::addAll);
     }
 
     @Override

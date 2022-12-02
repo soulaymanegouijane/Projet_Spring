@@ -1,5 +1,6 @@
 package com.projet.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -50,6 +51,7 @@ public class Member{
     private Set<Role> roles;
 
     @ManyToOne
+    @JsonBackReference("member-association")
     private Association association;
 
     public Member(String username, String email, String encode) {

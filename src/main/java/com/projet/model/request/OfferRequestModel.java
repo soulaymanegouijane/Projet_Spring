@@ -15,6 +15,5 @@ import java.util.Set;
 public class OfferRequestModel {
     private String title;
     private String description;
-    private MultipartFile image;
     private Set<Long> categoryIds;
 }
