@@ -1,9 +1,12 @@
 package com.projet.service;
 
-import com.projet.entity.Offer;
+import com.projet.exception.MemberNotFoundException;
+import com.projet.model.response.OfferResponseModel;
 
 import java.util.List;
 
 public interface OfferService {
-   List<Offer> retreiveOffers();
+   List<OfferResponseModel> retreiveOffers() throws MemberNotFoundException;
+
+   List<OfferResponseModel> retreiveMyOffers() throws MemberNotFoundException;
 }

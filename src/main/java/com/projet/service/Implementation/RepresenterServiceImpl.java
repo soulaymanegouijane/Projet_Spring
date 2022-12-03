@@ -6,6 +6,7 @@ import com.projet.exception.DemandNotFoundException;
 import com.projet.exception.MaterialNotFoundException;
 import com.projet.exception.OfferNotFoundException;
 import com.projet.model.request.OfferRequestModel;
+import com.projet.model.response.DemandsModel;
 import com.projet.model.response.MessageResponse;
 import com.projet.model.response.ResponseMessage;
 import com.projet.repository.CategoryRepository;
@@ -99,16 +100,22 @@ public class RepresenterServiceImpl implements RepresenterService {
 
     @Override
     @PreAuthorize("hasRole('REPRESENTATIVE')")
-    public Set<Demand> retreiveAllAssociationDemands() throws OfferNotFoundException {
+    public Set<DemandsModel> retreiveAllAssociationDemands() throws OfferNotFoundException {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Member member = memberRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new RuntimeException("L'utilisateur avec l'id " + userDetails.getId() + " n'existe pas"));
-        List<Offer> offers = offerRepository.findByAssociationId(member.getAssociation().getId());
-        System.out.println(offers);
-        return offers.stream()
-                .map(Offer::getDemands)
-                .flatMap(Set::stream)
-                .collect(HashSet::new, HashSet::add, HashSet::addAll);
+        List<Demand> demands =  demandRepository.findByOfferAssociationId(member.getAssociation().getId());
+        Set<DemandsModel> demandsModels = new HashSet<>();
+        for (Demand demand : demands) {
+            demandsModels.add(DemandsModel.builder()
+                    .id(demand.getId())
+                    .offerTitle(demand.getOffer().getTitle())
+                    .demanderUsername(demand.getMember().getUsername())
+                    .status(demand.getStatus().toString())
+                    .isArchived(demand.isArchived())
+                    .build());
+        }
+        return demandsModels;
     }
 
     @Override
@@ -141,6 +148,18 @@ public class RepresenterServiceImpl implements RepresenterService {
                 .body(ResponseMessage.builder()
                         .status(HttpStatus.ACCEPTED)
                         .message("Votre demande a été mis à jour")
+                        .build());
+    }
+
+    @Override
+    public ResponseEntity<ResponseMessage> deleteOffer(Long id) throws OfferNotFoundException {
+        Offer offer = offerRepository.findById(id)
+                .orElseThrow(() -> new OfferNotFoundException("L'offre avec l'id " + id + " n'existe pas"));
+        offerRepository.delete(offer);
+        return ResponseEntity.ok()
+                .body(ResponseMessage.builder()
+                        .status(HttpStatus.ACCEPTED)
+                        .message("L'offre a été supprimée avec succès")
                         .build());
     }
 }

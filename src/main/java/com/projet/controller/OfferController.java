@@ -1,6 +1,8 @@
 package com.projet.controller;
 
 import com.projet.entity.Offer;
+import com.projet.exception.MemberNotFoundException;
+import com.projet.model.response.OfferResponseModel;
 import com.projet.repository.OfferRepository;
 import com.projet.service.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,12 @@ public class OfferController {
     OfferService offerService;
 
     @GetMapping
-    public List<Offer> retreiveOffers(){
+    public List<OfferResponseModel> retreiveOffers() throws MemberNotFoundException {
         return offerService.retreiveOffers();
+    }
+
+    @GetMapping("/myOffers")
+    public List<OfferResponseModel> retreiveMyOffers() throws MemberNotFoundException {
+        return offerService.retreiveMyOffers();
     }
 }

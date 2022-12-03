@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class DemandsModel {
-    private long demandId;
+    private long id;
     private String offerTitle;
     private String demanderUsername;
+    private String  status;
+    private boolean isArchived;
 }

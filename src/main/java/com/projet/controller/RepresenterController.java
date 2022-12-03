@@ -8,6 +8,7 @@ import com.projet.exception.DemandNotFoundException;
 import com.projet.exception.MaterialNotFoundException;
 import com.projet.exception.OfferNotFoundException;
 import com.projet.model.request.OfferRequestModel;
+import com.projet.model.response.DemandsModel;
 import com.projet.model.response.MessageResponse;
 import com.projet.model.response.ResponseMessage;
 import com.projet.service.RepresenterService;
@@ -48,7 +49,7 @@ public class RepresenterController {
     }
 
     @GetMapping("/demands")
-    public Set<Demand> getAllDemands() throws OfferNotFoundException {
+    public Set<DemandsModel> getAllDemands() throws OfferNotFoundException {
         return representerService.retreiveAllAssociationDemands();
     }
 
@@ -57,7 +58,12 @@ public class RepresenterController {
         return representerService.transferDemand(id);
 
     }
-
-
-
+@DeleteMapping("/offers/{id}")
+    public ResponseEntity<ResponseMessage> deleteOffer(@PathVariable Long id) throws MaterialNotFoundException, CategoryNotFoundException, OfferNotFoundException {
+        return representerService.deleteOffer(id);
+    }
 }
+
+
+
+

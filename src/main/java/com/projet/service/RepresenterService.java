@@ -7,6 +7,7 @@ import com.projet.exception.DemandNotFoundException;
 import com.projet.exception.MaterialNotFoundException;
 import com.projet.exception.OfferNotFoundException;
 import com.projet.model.request.OfferRequestModel;
+import com.projet.model.response.DemandsModel;
 import com.projet.model.response.MessageResponse;
 import com.projet.model.response.ResponseMessage;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +29,11 @@ public interface RepresenterService {
 
 
     @PreAuthorize("hasRole('REPRESENTATIVE')")
-    Set<Demand> retreiveAllAssociationDemands() throws OfferNotFoundException;
+    Set<DemandsModel> retreiveAllAssociationDemands() throws OfferNotFoundException;
 
     ResponseEntity<MessageResponse> transferDemand(long id) throws DemandNotFoundException;
 
     ResponseEntity<ResponseMessage> acceptDemand(Long id);
+
+    ResponseEntity<ResponseMessage> deleteOffer(Long id) throws OfferNotFoundException;
 }
